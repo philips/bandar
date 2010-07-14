@@ -6,14 +6,19 @@ LIB=`dirname $0`/lib/
 PATH=$LIB:$PATH
 
 TP=`mktemp`
-trap "rm -f $TP; exit" INT TERM EXIT
+TP_BUF=`mktemp`
+trap "rm -f $TP $TP_BUF; exit" INT TERM EXIT
 
 source $HOME/.bandarrc
 
 cat - > $TP
 dos2unix $TP
 fix_patch $TP
-${VISUAL:-${EDITOR:-vi}} $TP < /dev/tty
+cp $TP $TP_BUF
+${VISUAL:-${EDITOR:-vi}} $TP_BUF < /dev/tty
+diff $TP $TP_BUF
+[ $? -ne 0 ] || exit
+mv $TP_BUF $TP
 file=`rename-patch $TP`
 echo "filename is $file"
 
@@ -23,4 +28,3 @@ quilt import $file
 quilt push && quilt ref && quilt pop && quilt push
 
 trap - INT TERM EXIT
-
