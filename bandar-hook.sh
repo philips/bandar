@@ -7,7 +7,14 @@ PATH=$LIB:$PATH
 
 TP=`mktemp`
 TP_BUF=`mktemp`
-trap "rm -f $TP $TP_BUF; exit" INT TERM EXIT
+file=""
+
+cleanup()
+{
+	rm -f $TP $TP_BUF $file; exit
+}
+
+trap "cleanup" INT TERM EXIT
 
 source $HOME/.bandarrc
 
@@ -28,5 +35,7 @@ cd $TREE
 
 quilt import $file
 quilt push && quilt ref && quilt pop && quilt push
+
+cleanup
 
 trap - INT TERM EXIT
