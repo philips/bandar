@@ -11,6 +11,8 @@ trap "rm -f $TP $TP_BUF; exit" INT TERM EXIT
 
 source $HOME/.bandarrc
 
+[ "z$BANDAR_TREE" != "z" ] && TREE=$BANDAR_TREE
+
 cat - > $TP
 dos2unix $TP
 fix_patch $TP
