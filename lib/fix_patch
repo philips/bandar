@@ -1,0 +1,16 @@
+#!/bin/bash
+
+TMPFILE=""
+
+trap "rm -f $TMPFILE; exit" INT TERM EXIT
+
+for PATCH in $*
+do
+	TMPFILE=`mktemp fix_patch.XXXXXX` || exit 1
+
+	echo "TMPFILE=$TMPFILE"
+	formail -k -X From: -X Subject: -X From -X To: -X Cc: -X Date: -X Message-ID: -X Content-Disposition: < $PATCH > $TMPFILE
+	mv $TMPFILE $PATCH
+done
+
+trap - INT TERM EXIT

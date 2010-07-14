@@ -1,0 +1,24 @@
+bandar - Patch monkey tools for mutt.
+------
+
+Simple set of scripts to integrate mutt/quilt/etc into a nice workflow: 
+- Review patch in mutt
+- Press key
+- Patch opens up in editor for editing
+- Close your editor and apply patch to tree
+
+installation
+------------
+
+- Add to PATH
+- cp bandarrc-sample to ~/.bandarrc
+
+mutt configuration
+------------------
+
+macro pager x <pipe-entry>'/home/philips/bandar/bandar-hook.sh'<enter> 'Process patch'
+
+
+Credit 
+------
+Greg KH: ftp://ftp.kernel.org/pub/linux/kernel/people/gregkh/gregkh-2.6/scripts/

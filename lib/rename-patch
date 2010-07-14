@@ -1,0 +1,91 @@
+#!/bin/bash
+
+# Rename patch files according to the Content-Disposition header line
+# if they do have one, or Subject if they don't.
+#
+# Copyright (C) 2005, 2006, 2008  Jean Delvare <khali@linux-fr.org>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details:
+# http://www.gnu.org/copyleft/gpl.html
+#
+# The latest official version of this script can be found at:
+# ftp://ftp.kernel.org/pub/linux/kernel/people/jdelvare/scripts/rename-patch
+
+# Avoid nasty locale effects
+export LC_ALL=C
+
+findname()
+{
+	local file="$1" pattern;
+
+	# Try Content-Disposition first
+	pattern='^Content-Disposition:[[:space:]]*inline[[:space:]]*;[[:space:]]*filename[[:space:]]*=';
+	if grep -q $pattern "$file"
+	then
+		sed -ne "/$pattern/{s/$pattern[[:space:]]*//p;q}" "$file"
+		return
+	fi
+
+	# Fallback to Subject
+	pattern='^Subject:';
+	if grep -q $pattern "$file"
+	then
+		sed -ne "/$pattern/{
+			s/$pattern[[:space:]]*//;
+			s/\[[^]]*\]//g;
+			s/[^a-z0-9._-]/-/ig;
+			s/--*/-/g;
+			s/^-//;
+			s/^re-//i;
+			s/[.-]*$/.patch/;
+			p;q}" "$file" | \
+		tr A-Z a-z
+		return
+	fi
+}
+
+if [ $# -eq 0 ]
+then
+	echo "Usage: rename-patch file [file...]" >&2
+	exit 1
+fi
+
+for file in "$@"
+do
+	name=$(findname "$file")
+	if echo "$file" | grep -q '/'
+	then
+		path=$(echo "$file" | sed -e 's/\/[^/]*$/\//')
+	else
+		path=''
+	fi
+
+	if [ -z "$name" ]
+	then
+		echo "No name found for $file" >&2
+		continue
+	fi
+
+	if [ "$path$name" == "$file" ]
+	then
+		# It's already OK
+		continue
+	fi
+
+	if [ -e "$path$name" ]
+	then
+		echo "Can't rename $file to $path$name which already exists" >&2
+		continue
+	fi
+
+	mv -f "$file" "$path$name"
+	echo "$path$name"
+done
