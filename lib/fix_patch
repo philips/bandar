@@ -1,4 +1,14 @@
 #!/bin/bash
+#
+# Does nothing more than take a patch in mbox format and strip off
+# a bunch of mail headers that git and quilt do not care about
+# Essencially just a wrapper around formail.  It could be merged into the
+# main bandar script, but it's nice to have around for other needs at
+# times.
+#
+# Can work on multiple patches on the command line, which is nicer than
+# formail on its own.
+#
 
 TMPFILE=""
 
@@ -7,8 +17,6 @@ trap "rm -f $TMPFILE; exit" INT TERM EXIT
 for PATCH in $*
 do
 	TMPFILE=`mktemp fix_patch.XXXXXX` || exit 1
-
-	echo "TMPFILE=$TMPFILE"
 	formail -k -X From: -X Subject: -X From -X To: -X Cc: -X Date: -X Message-ID: -X Content-Disposition: < $PATCH > $TMPFILE
 	mv $TMPFILE $PATCH
 done
