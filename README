@@ -18,6 +18,9 @@ mutt configuration
 
 macro pager x <pipe-entry>'/home/philips/bandar/bandar-hook.sh'<enter> 'Process patch'
 
+# Example of BANDAR_TREE env variable
+macro pager,index i <pipe-entry>'BANDAR_TREE=~/kernel/foobar-2.6/ /home/philips/trees/bandar/bandar-hook.sh'<enter> 'Process patch'
+
 
 Credit 
 ------
